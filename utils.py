@@ -35,13 +35,13 @@ def calculate_kpis(df):
             "avg_order_value": 0.0
         }
     
-    total_records = len(df)
-    total_revenue = df["Revenue"].sum()
-    avg_rating = df["Customer_Rating"].mean()
-    total_categories = df["Category"].nunique()
-    total_profit = df["Profit"].sum()
-    total_units = df["Quantity"].sum()
-    avg_order_value = df["Revenue"].mean()
+    total_records = int(len(df))
+    total_revenue = round(float(df["Revenue"].sum()), 2)
+    avg_rating = round(float(df["Customer_Rating"].mean()), 2)
+    total_categories = int(df["Category"].nunique())
+    total_profit = round(float(df["Profit"].sum()), 2)
+    total_units = int(df["Quantity"].sum())
+    avg_order_value = round(float(df["Revenue"].mean()), 2)
     
     return {
         "total_records": total_records,

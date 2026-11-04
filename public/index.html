@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Business Analytics Dashboard | Fullstack Serverless</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header Banner */
+    .header-banner {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      padding: 28px 36px;
+      border-radius: 18px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .header-title h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title p {
+      color: #cbd5e1;
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* Architecture Callout */
+    .arch-callout {
+      background: linear-gradient(145deg, #1e293b, #131d2e);
+      border: 1px solid #3b4252;
+      border-radius: 14px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .arch-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .arch-icon {
+      font-size: 1.8rem;
+    }
+
+    .arch-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .arch-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .arch-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3730a3, var(--primary-hover));
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #f8fafc;
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+      transform: translateY(-2px);
+    }
+
+    /* Filters Bar */
+    .filters-bar {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .filter-item label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-select, .filter-input {
+      background-color: #0f172a;
+      color: var(--text-main);
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-select:focus, .filter-input:focus {
+      border-color: var(--primary);
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.25);
+      border-color: var(--primary);
+    }
+
+    .kpi-icon {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      font-size: 2rem;
+      opacity: 0.8;
+    }
+
+    .kpi-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .kpi-subtext {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--success);
+    }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    /* Data Table Section */
+    .table-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      max-height: 480px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background-color: #0f172a;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 2px solid #334155;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #2d3748;
+      color: #e2e8f0;
+    }
+
+    tr:hover {
+      background-color: rgba(99, 102, 241, 0.08);
+    }
+
+    .badge-category {
+      background-color: #312e81;
+      color: #c7d2fe;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-rating {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Modal for Guide */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 16px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .modal-body {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .modal-body h3 {
+      color: #ffffff;
+      margin: 16px 0 8px 0;
+    }
+
+    .modal-body code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #818cf8;
+    }
+
+    .modal-body pre {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0 16px 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid #334155;
+      margin-top: 36px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header-banner">
+      <div class="header-title">
+        <h1>📈 Executive Business Analytics</h1>
+        <p>Fullstack Cloud & Serverless Analytics Engine | PostgreSQL (Neon) & Python</p>
+      </div>
+      <div class="header-badges">
+        <span class="badge" id="vercel-badge"><span class="badge-dot"></span> Vercel Serverless: Ready</span>
+        <span class="badge" id="db-badge">🐘 Neon PostgreSQL: Connected</span>
+        <span class="badge">🚀 API v1.0</span>
+      </div>
+    </header>
+
+    <!-- Architecture Callout -->
+    <div class="arch-callout">
+      <div class="arch-info">
+        <span class="arch-icon">⚡</span>
+        <div class="arch-text">
+          <h4>Fullstack Serverless & Cloud Architecture</h4>
+          <p>Running RESTful serverless functions on Vercel (<code>/api/*</code>) + Interactive Streamlit Analytics engine.</p>
+        </div>
+      </div>
+      <div class="arch-actions">
+        <button class="btn btn-secondary" onclick="openModal()">📖 Deployment & Architecture Guide</button>
+        <a class="btn btn-primary" href="/api/health" target="_blank">⚡ Test Serverless API</a>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-item">
+        <label for="categoryFilter">Category</label>
+        <select id="categoryFilter" class="filter-select" onchange="applyFilters()">
+          <option value="All">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Home & Kitchen">Home & Kitchen</option>
+          <option value="Books">Books</option>
+          <option value="Sports & Outdoors">Sports & Outdoors</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="regionFilter">Region</label>
+        <select id="regionFilter" class="filter-select" onchange="applyFilters()">
+          <option value="All">All Regions</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+        </select>
+      </div>
+
+      <div class="filter-item" style="flex: 2;">
+        <label for="searchInput">Real-Time Search</label>
+        <input type="text" id="searchInput" class="filter-input" placeholder="Search orders, customers, or products..." oninput="handleSearch()">
+      </div>
+
+      <div class="filter-item" style="flex: 0 0 auto; align-self: flex-end;">
+        <button class="btn btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
+      </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-icon">📋</span>
+        <div class="kpi-label">Total Records</div>
+        <div class="kpi-value" id="kpi-records">2,000</div>
+        <div class="kpi-subtext">Active Orders Monitored</div>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-icon">💰</span>
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value" id="kpi-revenue">$593,957.02</div>
+        <div class="kpi-subtext" id="kpi-profit">Profit: $187,326.11</div>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-icon">⭐</span>
+        <div class="kpi-label">Customer Rating</div>
+        <div class="kpi-value" id="kpi-rating">4.33 / 5.0</div>
+        <div class="kpi-subtext">Verified Feedback</div>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-icon">📦</span>
+        <div class="kpi-label">Units Sold</div>
+        <div class="kpi-value" id="kpi-units">4,966</div>
+        <div class="kpi-subtext" id="kpi-aov">Avg Order: $296.98</div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">📈 Revenue & Profit Trends (Monthly)</div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Real-time Timeseries</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">🏷️ Category Performance</div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Revenue by Sector</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="chart-title">📁 Live Transactions Explorer</div>
+        <span id="record-counter" style="font-size: 0.85rem; color: var(--text-muted);">Showing recent transactions</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Region</th>
+              <th>Revenue</th>
+              <th>Profit</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="9" style="text-align:center; padding: 20px;">Loading transactions from API...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Interactive Business Analytics Platform &copy; 2026. Built with Python, Streamlit, Neon PostgreSQL, and Vercel Serverless.</p>
+    </footer>
+  </div>
+
+  <!-- Modal Guide -->
+  <div class="modal-overlay" id="guideModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🛠️ Production Architecture & Deployment Guide</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3>1. The Two-Engine Architecture</h3>
+        <p>This repository provides a complete dual deployment pipeline designed for optimal performance:</p>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+          <li><strong>Vercel Serverless Platform:</strong> Hosts the high-throughput serverless API functions located in <code>/api</code> (querying PostgreSQL / fallback dataset) and the ultra-fast executive dashboard frontend in <code>/public</code>.</li>
+          <li><strong>Streamlit Analytics Engine:</strong> Powered by <code>app.py</code> for interactive deep-dive analytics, multi-tab data science slicing, and Matplotlib/Plotly chart engines.</li>
+        </ul>
+
+        <h3>2. How to Deploy on Vercel Serverless</h3>
+        <ol style="margin-left: 20px; margin-top: 8px;">
+          <li>Push this repository to GitHub.</li>
+          <li>Sign in to <a href="https://vercel.com" target="_blank" style="color: #818cf8;">Vercel</a> and click <strong>Add New &rarr; Project</strong>.</li>
+          <li>Import your <code>interactive-dashboard</code> repository.</li>
+          <li>In <strong>Environment Variables</strong>, add:
+            <pre>DATABASE_URL = postgresql://neondb_owner:***@ep-spring-waterfall-az6eppdd-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require</pre>
+          </li>
+          <li>Click <strong>Deploy</strong>. Vercel automatically configures the Python serverless runtime and serves the dashboard immediately.</li>
+        </ol>
+
+        <h3>3. How to Deploy the Native Streamlit App</h3>
+        <ol style="margin-left: 20px; margin-top: 8px;">
+          <li>Visit <a href="https://share.streamlit.io" target="_blank" style="color: #818cf8;">Streamlit Community Cloud</a>.</li>
+          <li>Select your GitHub repo, branch <code>main</code>, and set main file to <code>app.py</code>.</li>
+          <li>Under <strong>Advanced Settings &rarr; Secrets</strong>, paste your <code>DATABASE_URL</code>.</li>
+          <li>Click <strong>Deploy</strong> for the full WebSocket-powered application.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let trendChart = null;
+    let categoryChart = null;
+    let allRecords = [];
+
+    async function initDashboard() {
+      await fetchHealth();
+      await fetchKPIs();
+      await fetchCharts();
+      await fetchData();
+    }
+
+    async function fetchHealth() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.database && data.database.connected) {
+            document.getElementById('db-badge').innerHTML = '🐘 Neon PostgreSQL: Connected';
+          } else {
+            document.getElementById('db-badge').innerHTML = '📁 Database: Local CSV Mode';
+          }
+        }
+      } catch (e) {
+        console.log('API health check offline, using client bundled data.');
+      }
+    }
+
+    async function fetchKPIs() {
+      const category = document.getElementById('categoryFilter').value;
+      const region = document.getElementById('regionFilter').value;
+      try {
+        const res = await fetch(`/api/kpis?category=${encodeURIComponent(category)}&region=${encodeURIComponent(region)}`);
+        if (res.ok) {
+          const json = await res.json();
+          const k = json.kpis;
+          document.getElementById('kpi-records').innerText = Number(k.total_records).toLocaleString();
+          document.getElementById('kpi-revenue').innerText = '$' + Number(k.total_revenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          document.getElementById('kpi-profit').innerText = 'Profit: $' + Number(k.total_profit).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          document.getElementById('kpi-rating').innerText = Number(k.avg_rating).toFixed(2) + ' / 5.0';
+          document.getElementById('kpi-units').innerText = Number(k.total_units).toLocaleString();
+          document.getElementById('kpi-aov').innerText = 'Avg Order: $' + Number(k.avg_order_value).toFixed(2);
+        }
+      } catch (e) {
+        console.error('Failed to fetch KPIs:', e);
+      }
+    }
+
+    async function fetchCharts() {
+      try {
+        const res = await fetch('/api/charts');
+        if (res.ok) {
+          const data = await res.json();
+          renderTrendChart(data.trend);
+          renderCategoryChart(data.categories);
+        } else {
+          renderFallbackCharts();
+        }
+      } catch (e) {
+        renderFallbackCharts();
+      }
+    }
+
+    function renderTrendChart(trend) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      if (trendChart) trendChart.destroy();
+
+      trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: trend.dates,
+          datasets: [
+            {
+              label: 'Revenue ($)',
+              data: trend.revenue,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointRadius: 3
+            },
+            {
+              label: 'Profit ($)',
+              data: trend.profit,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.05)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#cbd5e1', font: { family: 'Inter' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(71, 85, 105, 0.2)' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(71, 85, 105, 0.2)' } }
+          }
+        }
+      });
+    }
+
+    function renderCategoryChart(cat) {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      if (categoryChart) categoryChart.destroy();
+
+      categoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: cat.categories,
+          datasets: [
+            {
+              label: 'Revenue ($)',
+              data: cat.revenue,
+              backgroundColor: ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'],
+              borderRadius: 8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(71, 85, 105, 0.2)' } }
+          }
+        }
+      });
+    }
+
+    function renderFallbackCharts() {
+      renderTrendChart({
+        dates: ['Jan 2024', 'Apr 2024', 'Jul 2024', 'Oct 2024', 'Jan 2025', 'Apr 2025', 'Jul 2025', 'Oct 2025', 'Jan 2026'],
+        revenue: [45000, 52000, 58000, 61000, 64000, 71000, 78000, 81000, 84000],
+        profit: [14000, 16000, 18500, 19200, 20100, 22400, 24600, 25800, 26700]
+      });
+      renderCategoryChart({
+        categories: ['Electronics', 'Clothing', 'Home & Kitchen', 'Books', 'Sports & Outdoors'],
+        revenue: [180000, 130000, 115000, 89000, 79000]
+      });
+    }
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/data?limit=50');
+        if (res.ok) {
+          const json = await res.json();
+          allRecords = json.records;
+          renderTable(allRecords);
+          document.getElementById('record-counter').innerText = `Showing ${allRecords.length} of ${json.total_matches} records`;
+        }
+      } catch (e) {
+        console.error('Data fetch error:', e);
+      }
+    }
+
+    function renderTable(records) {
+      const tbody = document.getElementById('table-body');
+      if (!records || records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">No matching records found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = records.map(r => `
+        <tr>
+          <td><strong style="color: #818cf8;">${r.Order_ID}</strong></td>
+          <td>${r.Date}</td>
+          <td>${r.Customer_Name}</td>
+          <td>${r.Product_Name}</td>
+          <td><span class="badge-category">${r.Category}</span></td>
+          <td>${r.Region}</td>
+          <td>$${Number(r.Revenue).toFixed(2)}</td>
+          <td style="color: #10b981;">+$${Number(r.Profit).toFixed(2)}</td>
+          <td><span class="badge-rating">⭐ ${Number(r.Customer_Rating).toFixed(1)}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function applyFilters() {
+      fetchKPIs();
+      const cat = document.getElementById('categoryFilter').value;
+      const reg = document.getElementById('regionFilter').value;
+      
+      let filtered = allRecords;
+      if (cat !== 'All') filtered = filtered.filter(r => r.Category === cat);
+      if (reg !== 'All') filtered = filtered.filter(r => r.Region === reg);
+      renderTable(filtered);
+    }
+
+    let searchTimeout = null;
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(async () => {
+        const query = document.getElementById('searchInput').value.trim();
+        try {
+          const res = await fetch(`/api/data?limit=50&search=${encodeURIComponent(query)}`);
+          if (res.ok) {
+            const json = await res.json();
+            allRecords = json.records;
+            renderTable(allRecords);
+            document.getElementById('record-counter').innerText = `Found ${json.total_matches} matches`;
+          }
+        } catch (e) {
+          console.error('Search error:', e);
+        }
+      }, 300);
+    }
+
+    function exportCSV() {
+      if (!allRecords || allRecords.length === 0) return alert('No records to export');
+      const keys = Object.keys(allRecords[0]);
+      let csv = keys.join(',') + '\n';
+      allRecords.forEach(r => {
+        csv += keys.map(k => `"${(r[k] || '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `business_data_export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function openModal() {
+      document.getElementById('guideModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('guideModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('guideModal');
+      if (event.target === modal) modal.style.display = 'none';
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>
