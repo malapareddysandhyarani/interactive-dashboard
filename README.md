@@ -158,3 +158,4 @@ python seed_db.py
 ## 🔒 Security & Best Practices
 - **Zero Exposed Secrets**: `.env` and `.streamlit/secrets.toml` are strictly ignored by Git. Credentials are injected via platform environment variable managers (Vercel Project Settings & Streamlit Cloud Secrets).
 - **Graceful Fallback**: If PostgreSQL connectivity experiences latency or timeout, the system automatically falls back to `business_data.csv` to ensure 100% uptime.
+
